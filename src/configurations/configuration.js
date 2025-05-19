@@ -1,13 +1,13 @@
 export const CONFIG = {
-  API_GATEWAY: "http://localhost:8080/profile",
+  API_GATEWAY: "http://localhost:8091/regret",
 };
 
 export const API = {
-  REGISTRATION: "/register",
-  MY_PROFILE: "/my-profile",
+  REGISTRATION: "/profile/register",
+  MY_PROFILE: "/profile/my-profile",
 };
 
-export const KEYCLOACK_CONFIG = {
+export const KEYCLOAK_CONFIG = {
   url: "http://localhost:8090",
   realm: "regret",
   clientId: "regret_web_app",
