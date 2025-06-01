@@ -1,5 +1,5 @@
 import httpClient from "../configurations/httpClient";
-import { API } from "../configurations/configuration";
+import { CONFIG, API } from "../configurations/configuration";
 import keycloak from "../keycloak";
 
 export const register = async (data) => {
@@ -13,3 +13,12 @@ export const getMyProfile = async () => {
     }
   })
 }
+
+export const getOnlineUsers = async () => {
+  return await httpClient.get(CONFIG.API_GATEWAY + "/profile/users", {
+    headers: {
+      Authorization: "Bearer " + keycloak.token
+    },
+  });
+};
+
