@@ -5,7 +5,7 @@ import keycloak from "../keycloak";
 export const register = async (data) => {
   return await httpClient.post(API.REGISTRATION, data);
 };
-
+//Profile
 export const getMyProfile = async () => {
   return await httpClient.get(API.MY_PROFILE, {
     headers : {
@@ -15,7 +15,7 @@ export const getMyProfile = async () => {
 }
 
 export const getOnlineUsers = async () => {
-  return await httpClient.get(CONFIG.API_GATEWAY + "/profile/users", {
+  return await httpClient.get(API.CONNECT_USERS, {
     headers: {
       Authorization: "Bearer " + keycloak.token
     },
