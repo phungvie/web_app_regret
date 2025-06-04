@@ -1,8 +1,11 @@
 // Chat.jsx - Giao diện chat với chú thích từng dòng
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {getMyProfile, getOnlineUsers} from "../services/userService";
 import {getMessages, getMyChatRooms} from "../services/chatService";
 import keycloak from "../keycloak";
+import { CONFIG} from "../configurations/configuration";
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
 
 const Chat = () => {
     // State lưu danh sách các phòng chat
@@ -28,6 +31,10 @@ const Chat = () => {
             status: null
         }
     );
+
+    const stompClient = useRef(null);
+
+    // Lấy thông tin profile của user hiện tại khi component mount
     useEffect(() => {
         getProfile()
             .catch(reason => {
@@ -40,8 +47,9 @@ const Chat = () => {
         const response = await getMyProfile();
         const data = response.data;
         setCurrentUser(data.result);
-        console.log("getProfile",data.result)
+        console.log("getProfile", data.result)
     };
+
 
     // Lấy danh sách phòng chat từ API khi component mount
     useEffect(() => {
@@ -58,7 +66,8 @@ const Chat = () => {
             });
     }, []);
 
-    // Lấy danh sách user online từ API khi component mount
+
+    // L��y danh sách user online từ API khi component mount
     useEffect(() => {
         async function fetchOnlineUsers() {
             const response = await getOnlineUsers();
@@ -73,6 +82,7 @@ const Chat = () => {
             });
     }, []);
 
+
     // Khi chọn phòng chat, lấy tin nhắn của phòng đó
     useEffect(() => {
         async function fetchMessages() {
@@ -82,6 +92,7 @@ const Chat = () => {
                 console.log("getMessages", response.data.result)
             }
         }
+
         fetchMessages()
             .catch(reason => {
                 console.error("Lỗi khi lấy tin nhắn:", reason);
@@ -89,7 +100,57 @@ const Chat = () => {
             });
     }, [selectedRoom]);
 
-    // Xử lý gửi tin nhắn
+    // Kết nối WebSocket khi component mount
+    useEffect(() => {
+        // Chỉ kết nối khi đã có thông tin user
+        if (!currentUser.profileId) return;
+        const socket = new SockJS(CONFIG.API_GATEWAY + '/ws');
+        stompClient.current = Stomp.over(socket);
+        stompClient.current.connect(
+            { Authorization: 'Bearer ' + keycloak.token },
+            onConnected,
+            onError
+        );
+        // Cleanup khi unmount
+        return () => {
+            if (stompClient.current) {
+                stompClient.current.disconnect();
+            }
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentUser.profileId]);
+
+    function onConnected() {
+        // Đăng ký nhận tin nhắn cá nhân
+        if (!currentUser.profileId) return;
+        stompClient.current.subscribe(
+            `/user/${currentUser.profileId}/queue/messages`,
+            onMessageReceived
+        );
+        stompClient.current.subscribe(`/user/public`, onMessageReceived);
+
+        stompClient.current.send("/app/user.connectUser", {});
+
+
+        // Đăng ký nhận tin nhắn public nếu cần
+        // stompClient.current.subscribe('/topic/public', onMessageReceived);
+    }
+
+    function onError(error) {
+        console.error('WebSocket error:', error);
+    }
+
+    function onMessageReceived(message) {
+        // Xử lý khi nhận được tin nhắn mới
+        try {
+            const msg = JSON.parse(message.body);
+            console.log("onMessageReceived", msg);
+        } catch (e) {
+            console.error('Lỗi parse message:', e);
+        }
+    }
+
+    // Xử lý gửi tin nhắn http
     const handleSendMessage = async (e) => {
     };
 
