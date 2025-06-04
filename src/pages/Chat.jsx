@@ -215,6 +215,29 @@ const Chat = () => {
         setSelectedRoom(room); // Chọn phòng chat
     };
 
+    function formatTimeAgo(timestamp) {
+        const now = new Date();
+        const date = new Date(timestamp);
+        const diff = Math.floor((now - date) / 1000); // giây
+        if (diff < 60) return `${diff} giây trước`;
+        if (diff < 3600) {
+            const m = Math.floor(diff / 60);
+            const s = diff % 60;
+            return `${m} phút${s > 0 ? ` ${s} giây` : ''} trước`;
+        }
+        if (diff < 86400) {
+            const h = Math.floor(diff / 3600);
+            const m = Math.floor((diff % 3600) / 60);
+            return `${h} giờ${m > 0 ? ` ${m} phút` : ''} trước`;
+        }
+        if (diff < 2592000) {
+            const d = Math.floor(diff / 86400);
+            const h = Math.floor((diff % 86400) / 3600);
+            return `${d} ngày${h > 0 ? ` ${h} giờ` : ''} trước`;
+        }
+        return date.toLocaleDateString();
+    }
+
     return (
         <div style={{
             display: "flex",
@@ -329,7 +352,7 @@ const Chat = () => {
                                                 marginTop: 4,
                                                 textAlign: "right"
                                             }}>
-                                                {new Date(msg.timestamp).toLocaleString()}
+                                                {formatTimeAgo(msg.timestamp)}
                                             </span>
                                         )}
                                     </div>
