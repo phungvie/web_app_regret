@@ -323,41 +323,48 @@ const Chat = () => {
                 <div style={{flex: 1, overflowY: "auto", padding: 16}}>
                     {selectedRoom ? (
                         messages.length ? (
-                            messages.map((msg, idx) => (
-                                <div
-                                    key={idx}
-                                    style={{
-                                        marginBottom: 8,
-                                        display: "flex",
-                                        justifyContent: msg.senderId === currentUser.profileId ? "flex-end" : "flex-start"
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            background: msg.senderId === currentUser.profileId ? "#DCF8C6" : (darkMode ? "#3a3b3c" : "#f1f0f0"),
-                                            padding: "8px 12px",
-                                            borderRadius: 12,
-                                            maxWidth: "60%",
-                                            textAlign: msg.senderId === currentUser.profileId ? "right" : "left",
-                                            color: msg.senderId === currentUser.profileId ? "#18191A" : (darkMode ? "#f0f6ff" : "#18191A"),
-                                            position: "relative"
-                                        }}
-                                    >
-                                        <b>{msg.senderId === currentUser.profileId ? "Me" : selectedRoom.recipientName}:</b> {msg.content}
-                                        {msg.timestamp && (
-                                            <span style={{
-                                                display: "block",
-                                                fontSize: 12,
-                                                color: "#888",
-                                                marginTop: 4,
-                                                textAlign: "right"
-                                            }}>
-                                                {formatTimeAgo(msg.timestamp)}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            ))
+                            (() => {
+                                const timeThreshold = 5 * 60; // 5 phút
+                                let lastTimestamp = null;
+                                return messages.map((msg, idx) => {
+                                    const current = new Date(msg.timestamp);
+                                    let showTime = false;
+                                    if (!lastTimestamp || (current - lastTimestamp) / 1000 > timeThreshold) {
+                                        showTime = true;
+                                        lastTimestamp = current;
+                                    }
+                                    return (
+                                        <React.Fragment key={idx}>
+                                            {showTime && (
+                                                <div style={{textAlign: "center", color: "#888", fontSize: 13, margin: "12px 0 4px 0"}}>
+                                                    {formatTimeAgo(msg.timestamp)}
+                                                </div>
+                                            )}
+                                            <div
+                                                style={{
+                                                    marginBottom: 8,
+                                                    display: "flex",
+                                                    justifyContent: msg.senderId === currentUser.profileId ? "flex-end" : "flex-start"
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        background: msg.senderId === currentUser.profileId ? "#DCF8C6" : (darkMode ? "#3a3b3c" : "#f1f0f0"),
+                                                        padding: "8px 12px",
+                                                        borderRadius: 12,
+                                                        maxWidth: "60%",
+                                                        textAlign: msg.senderId === currentUser.profileId ? "right" : "left",
+                                                        color: msg.senderId === currentUser.profileId ? "#18191A" : (darkMode ? "#f0f6ff" : "#18191A"),
+                                                        position: "relative"
+                                                    }}
+                                                >
+                                                    <b>{msg.senderId === currentUser.profileId ? "Me" : selectedRoom.recipientName}:</b> {msg.content}
+                                                </div>
+                                            </div>
+                                        </React.Fragment>
+                                    );
+                                });
+                            })()
                         ) : (
                             <div style={{color: darkMode ? "#f0f6ff" : "#18191A"}}>Chưa có tin nhắn nào.</div>
                         )
