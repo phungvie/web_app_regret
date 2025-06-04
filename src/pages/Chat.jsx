@@ -316,10 +316,22 @@ const Chat = () => {
                                             borderRadius: 12,
                                             maxWidth: "60%",
                                             textAlign: msg.senderId === currentUser.profileId ? "right" : "left",
-                                            color: msg.senderId === currentUser.profileId ? "#18191A" : (darkMode ? "#f0f6ff" : "#18191A")
+                                            color: msg.senderId === currentUser.profileId ? "#18191A" : (darkMode ? "#f0f6ff" : "#18191A"),
+                                            position: "relative"
                                         }}
                                     >
                                         <b>{msg.senderId === currentUser.profileId ? "Me" : selectedRoom.recipientName}:</b> {msg.content}
+                                        {msg.timestamp && (
+                                            <span style={{
+                                                display: "block",
+                                                fontSize: 12,
+                                                color: "#888",
+                                                marginTop: 4,
+                                                textAlign: "right"
+                                            }}>
+                                                {new Date(msg.timestamp).toLocaleString()}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             ))
