@@ -80,7 +80,7 @@ export default function Header() {
   const handleLogout = (event) => {
     handleMenuClose();
     logOut();
-    window.location.href = "/login";
+    // window.location.href = "/login";
   };
 
   const menuId = "primary-search-account-menu";

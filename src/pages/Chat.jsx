@@ -1,7 +1,7 @@
 // Chat.jsx - Giao diện chat với chú thích từng dòng
 import React, {useCallback, useEffect, useRef, useState} from "react";
-import {getMyProfile, getOnlineUsers} from "../services/userService";
-import {getMessages, getMyChatRooms} from "../services/chatService";
+import {connectUser, disconnectUser, getMyProfile, getOnlineUsers} from "../services/userService";
+import {getMessages, getMyChatRooms, sendMessage} from "../services/chatService";
 import keycloak from "../keycloak";
 import { CONFIG} from "../configurations/configuration";
 import SockJS from 'sockjs-client';
@@ -57,6 +57,10 @@ const Chat = () => {
             const response = await getMyChatRooms();
             setChatRooms(response.data.result);
             console.log("getMyChatRooms", response.data.result)
+            // Nếu có phòng chat, chọn phòng đầu tiên
+            if (response.data.result && response.data.result.length > 0) {
+                setSelectedRoom(response.data.result[0]);
+            }
         }
 
         fetchChatRooms()
@@ -67,7 +71,7 @@ const Chat = () => {
     }, []);
 
 
-    // L��y danh sách user online từ API khi component mount
+    // Lấy danh sách user online từ API khi component mount
     useEffect(() => {
         async function fetchOnlineUsers() {
             const response = await getOnlineUsers();
@@ -115,6 +119,7 @@ const Chat = () => {
         return () => {
             if (stompClient.current) {
                 stompClient.current.disconnect();
+                disconnectUser().catch(() => console.error("lỗi api disconnectUser"));
             }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,10 +132,10 @@ const Chat = () => {
             `/user/${currentUser.profileId}/queue/messages`,
             onMessageReceived
         );
-        stompClient.current.subscribe(`/user/public`, onMessageReceived);
+        // stompClient.current.subscribe(`/user/public`, onMessageReceived);
 
-        stompClient.current.send("/app/user.connectUser", {});
-
+        // stompClient.current.send("/app/user.connectUser", {});
+        connectUser().catch(reason => console.error("lỗi api connectUser",reason));
 
         // Đăng ký nhận tin nhắn public nếu cần
         // stompClient.current.subscribe('/topic/public', onMessageReceived);
@@ -144,6 +149,7 @@ const Chat = () => {
         // Xử lý khi nhận được tin nhắn mới
         try {
             const msg = JSON.parse(message.body);
+            setMessages(prev => [...prev, msg])
             console.log("onMessageReceived", msg);
         } catch (e) {
             console.error('Lỗi parse message:', e);
@@ -152,6 +158,27 @@ const Chat = () => {
 
     // Xử lý gửi tin nhắn http
     const handleSendMessage = async (e) => {
+        if (e) e.preventDefault();
+        if (!messageInput.trim()) return;
+        try {
+            const res = await sendMessage({
+                recipientId: selectedRoom.recipientId,
+                content: messageInput,
+            });
+            // Thêm tin nhắn vừa gửi vào danh sách tin nhắn nếu gửi thành công
+            setMessages(prev => [
+                ...prev,
+                {
+                    senderId: currentUser.profileId,
+                    recipientId: selectedRoom.recipientId,
+                    content: messageInput,
+                    // Có thể bổ sung thêm các trường khác nếu API trả về
+                }
+            ]);
+            setMessageInput("");
+        } catch (err) {
+            console.error("Lỗi sendMessage", err);
+        }
     };
 
     // Khi click vào user online, tìm hoặc tạo phòng chat với user đó
@@ -175,7 +202,7 @@ const Chat = () => {
     };
 
     return (
-        <div style={{display: "flex", height: "80vh", border: "1px solid #ccc"}}>
+        <div style={{display: "flex", height: "100vh", width: "100vw", border: "1px solid #ccc", position: "fixed", top: 0, left: 0, background: "#fff", zIndex: 1000}}>
             {/* Bên trái: Danh sách phòng chat */}
             <div style={{flex: 1, borderRight: "1px solid #eee", overflowY: "auto"}}>
                 <h3 style={{textAlign: "center"}}>Chat Rooms</h3>
@@ -201,8 +228,25 @@ const Chat = () => {
                     {selectedRoom ? (
                         messages.length ? (
                             messages.map((msg, idx) => (
-                                <div key={idx} style={{marginBottom: 8}}>
-                                    <b>{msg.senderId === currentUser.profileId ? "Me" : msg.senderId}:</b> {msg.content}
+                                <div
+                                    key={idx}
+                                    style={{
+                                        marginBottom: 8,
+                                        display: "flex",
+                                        justifyContent: msg.senderId === currentUser.profileId ? "flex-end" : "flex-start"
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            background: msg.senderId === currentUser.profileId ? "#DCF8C6" : "#f1f0f0",
+                                            padding: "8px 12px",
+                                            borderRadius: 12,
+                                            maxWidth: "60%",
+                                            textAlign: msg.senderId === currentUser.profileId ? "right" : "left"
+                                        }}
+                                    >
+                                        <b>{msg.senderId === currentUser.profileId ? "Me" : selectedRoom.recipientName}:</b> {msg.content}
+                                    </div>
                                 </div>
                             ))
                         ) : (
@@ -215,15 +259,46 @@ const Chat = () => {
                 {/* Form gửi tin nhắn */}
                 {selectedRoom && (
                     <form onSubmit={handleSendMessage}
-                          style={{display: "flex", padding: 8, borderTop: "1px solid #eee"}}>
+                          style={{
+                              display: "flex",
+                              padding: 8,
+                              borderTop: "1px solid #eee",
+                              background: "transparent" // nền trong suốt
+                          }}>
                         <input
                             type="text"
                             value={messageInput}
                             onChange={e => setMessageInput(e.target.value)}
                             placeholder="Nhập tin nhắn..."
-                            style={{flex: 1, marginRight: 8}}
+                            style={{
+                                flex: 1,
+                                marginRight: 8,
+                                padding: "10px 14px",
+                                border: "1px solid #b2dfdb",
+                                borderRadius: 20,
+                                outline: "none",
+                                fontSize: 16,
+                                background: "#f1f8e9"
+                            }}
                         />
-                        <button type="submit">Gửi</button>
+                        <button type="submit"
+                                style={{
+                                    background: "#66bb6a",
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: 8, // vuông hơn
+                                    padding: "10px 24px",
+                                    fontWeight: 600,
+                                    fontSize: 16,
+                                    cursor: "pointer",
+                                    transition: "background 0.2s",
+                                    boxShadow: "0 2px 6px rgba(102,187,106,0.08)"
+                                }}
+                                onMouseOver={e => e.currentTarget.style.background = '#43a047'}
+                                onMouseOut={e => e.currentTarget.style.background = '#66bb6a'}
+                        >
+                            Gửi
+                        </button>
                     </form>
                 )}
             </div>
@@ -248,4 +323,3 @@ const Chat = () => {
 
 
 export default Chat;
-

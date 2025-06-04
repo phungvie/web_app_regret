@@ -20,3 +20,11 @@ export const getMessages = async (senderId, recipientId) => {
         }
     });
 }
+
+export const sendMessage = async (data) => {
+    return await httpClient.post(API.CHAT, data, {
+        headers: {
+            Authorization:"Bearer " + keycloak.token
+        }
+    });
+}

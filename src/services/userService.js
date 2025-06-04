@@ -22,3 +22,19 @@ export const getOnlineUsers = async () => {
   });
 };
 
+export const disconnectUser = async () => {
+  return await httpClient.post(API.DISCONNECT, {},{
+    headers: {
+      Authorization: "Bearer " + keycloak.token
+    },
+  });
+}
+
+export const connectUser = async () => {
+  return await httpClient.post(API.CONNECT, {},{
+    headers: {
+      Authorization: "Bearer " + keycloak.token
+    },
+  });
+};
+
