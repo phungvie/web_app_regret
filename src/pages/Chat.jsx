@@ -186,6 +186,7 @@ const Chat = () => {
                     senderId: currentUser.profileId,
                     recipientId: selectedRoom.recipientId,
                     content: messageInput,
+                    timestamp: new Date().toISOString(),
                     // Có thể bổ sung thêm các trường khác nếu API trả về
                 }
             ]);
@@ -219,7 +220,7 @@ const Chat = () => {
         const now = new Date();
         const date = new Date(timestamp);
         const diff = Math.floor((now - date) / 1000); // giây
-        if (diff < 60) return `${diff} giây trước`;
+        if (diff < 60) return `Vài giây trước`;
         if (diff < 3600) {
             const m = Math.floor(diff / 60);
             const s = diff % 60;
