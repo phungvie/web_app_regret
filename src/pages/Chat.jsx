@@ -6,6 +6,7 @@ import keycloak from "../keycloak";
 import { CONFIG} from "../configurations/configuration";
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
+import { FaMoon, FaSun, FaUsers, FaUser } from "react-icons/fa";
 
 const Chat = () => {
     // State lưu danh sách các phòng chat
@@ -36,6 +37,16 @@ const Chat = () => {
 
     // State cho ẩn/hiện panel Online Users
     const [showOnlineUsers, setShowOnlineUsers] = useState(true);
+    // State cho dark mode, lấy giá trị từ localStorage nếu có
+    const [darkMode, setDarkMode] = useState(() => {
+        const saved = localStorage.getItem('darkMode');
+        return saved === null ? false : saved === 'true';
+    });
+
+    // Lưu darkMode vào localStorage mỗi khi thay đổi
+    useEffect(() => {
+        localStorage.setItem('darkMode', darkMode);
+    }, [darkMode]);
 
     // Lấy thông tin profile của user hiện tại khi component mount
     useEffect(() => {
@@ -205,21 +216,68 @@ const Chat = () => {
     };
 
     return (
-        <div style={{display: "flex", height: "100vh", width: "100vw", border: "none", position: "fixed", top: 0, left: 0, background: "#fff", zIndex: 1000, gap: "8px", padding: "8px", boxShadow: "0 12px 48px 0 rgba(25, 118, 210, 0.25)"}}>
+        <div style={{
+            display: "flex",
+            height: "100vh",
+            width: "100vw",
+            border: "none",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            background: darkMode ? "#18191A" : "#fff",
+            color: darkMode ? "#f0f6ff" : "#18191A",
+            zIndex: 1000,
+            gap: "8px",
+            padding: "8px",
+            boxShadow: darkMode ? "0 12px 48px 0 rgba(25, 118, 210, 0.10)" : "0 12px 48px 0 rgba(25, 118, 210, 0.25)"
+        }}>
+            {/* Nút chuyển dark/light mode */}
+            <button
+                onClick={() => setDarkMode(dm => !dm)}
+                style={{
+                    position: "absolute",
+                    top: 16,
+                    left: 32,
+                    zIndex: 1100,
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: darkMode ? "#333" : "#e3f2fd",
+                    color: darkMode ? "#f0f6ff" : "#18191A",
+                    cursor: "pointer",
+                    boxShadow: "0 2px 8px 0 rgba(25, 118, 210, 0.10)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px"
+                }}
+            >
+                {darkMode ? (<FaSun />) : (<FaMoon />)}
+            </button>
             {/* Bên trái: Danh sách phòng chat */}
-            <div style={{flex: 1, borderRight: "none", overflowY: "auto", marginRight: "6px", borderRadius: "18px", border: "none", boxShadow: "0 8px 32px 0 rgba(25, 118, 210, 0.28)", background: "#f0f6ff", transition: "box-shadow 0.3s"}}>
-                <h3 style={{textAlign: "center"}}>Chat Rooms</h3>
+            <div style={{
+                flex: 1,
+                borderRight: "none",
+                overflowY: "auto",
+                marginRight: "6px",
+                borderRadius: "18px",
+                border: "none",
+                boxShadow: darkMode ? "0 8px 32px 0 rgba(25, 118, 210, 0.10)" : "0 8px 32px 0 rgba(25, 118, 210, 0.28)",
+                background: darkMode ? "#242526" : "#f0f6ff",
+                transition: "box-shadow 0.3s, background 0.3s"
+            }}>
+                <h3 style={{textAlign: "center", color: darkMode ? "#f0f6ff" : "#18191A"}}>Chat Rooms</h3>
                 <ul style={{listStyle: "none", padding: 0}}>
                     {chatRooms.map((room, idx) => (
                         <li
                             key={idx}
                             style={{
                                 padding: "10px",
-                                background: selectedRoom === room ? "#e3f2fd" : "#f0f6ff",
+                                background: selectedRoom === room ? (darkMode ? "#3a3b3c" : "#e3f2fd") : (darkMode ? "#242526" : "#f0f6ff"),
                                 cursor: "pointer",
                                 borderRadius: "12px",
                                 transition: "background 0.3s, box-shadow 0.3s",
-                                boxShadow: selectedRoom === room ? "0 4px 16px 0 rgba(25, 118, 210, 0.18)" : "0 2px 8px 0 rgba(25, 118, 210, 0.10)"
+                                boxShadow: selectedRoom === room ? "0 4px 16px 0 rgba(25, 118, 210, 0.18)" : "0 2px 8px 0 rgba(25, 118, 210, 0.10)",
+                                color: darkMode ? "#f0f6ff" : "#18191A"
                             }}
                             onClick={() => setSelectedRoom(room)}
                         >
@@ -229,15 +287,14 @@ const Chat = () => {
                 </ul>
             </div>
             {/* Ở giữa: Hiển thị tin nhắn và gửi tin nhắn */}
-            <div style={{flex: 2, display: "flex", flexDirection: "column", borderRadius: "12px", border: "none", boxShadow: "0 8px 32px 0 rgba(25, 118, 210, 0.28)", background: "#f0f6ff", transition: "box-shadow 0.3s"}}>
+            <div style={{flex: 2, display: "flex", flexDirection: "column", borderRadius: "12px", border: "none", boxShadow: darkMode ? "0 8px 32px 0 rgba(25, 118, 210, 0.10)" : "0 8px 32px 0 rgba(25, 118, 210, 0.28)", background: darkMode ? "#242526" : "#f0f6ff", transition: "box-shadow 0.3s"}}>
                 {/* Nút ẩn/hiện Online Users */}
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.7)', borderBottom: '1px solid #e0e0e0', minHeight: 48, padding: '0 8px'}}>
-                    <div style={{fontWeight: 'bold', fontSize: 18, color: '#222', letterSpacing: 0.5}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: darkMode ? "rgba(255,255,255,0.1)" : 'rgba(255,255,255,0.7)', borderBottom: '1px solid #e0e0e0', minHeight: 48, padding: '0 8px'}}>
+                    <div style={{fontWeight: 'bold', fontSize: 18, color: darkMode ? "#f0f6ff" : '#222', letterSpacing: 0.5}}>
                         {selectedRoom ? (selectedRoom.recipientName || selectedRoom.recipientId) : 'Chọn phòng chat'}
                     </div>
-                    <button onClick={() => setShowOnlineUsers(v => !v)} style={{marginLeft: 8, border: 'none', background: '#e3f2fd', color: '#1976d2', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                        <span style={{fontSize: 20, marginRight: 6}}>{showOnlineUsers ? '����' : '👤'}</span>
-                        {showOnlineUsers ? 'Ẩn' : 'Hiện'} Online Users
+                    <button onClick={() => setShowOnlineUsers(v => !v)} style={{marginLeft: 8, border: 'none', background: darkMode ? "#333" : "#e3f2fd", color: darkMode ? "#f0f6ff" : "#1976d2", borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'}}>
+                        {showOnlineUsers ? (<FaUsers />) : (<FaUser />)}
                     </button>
                 </div>
                 <div style={{flex: 1, overflowY: "auto", padding: 16}}>
@@ -254,11 +311,12 @@ const Chat = () => {
                                 >
                                     <div
                                         style={{
-                                            background: msg.senderId === currentUser.profileId ? "#DCF8C6" : "#f1f0f0",
+                                            background: msg.senderId === currentUser.profileId ? "#DCF8C6" : (darkMode ? "#3a3b3c" : "#f1f0f0"),
                                             padding: "8px 12px",
                                             borderRadius: 12,
                                             maxWidth: "60%",
-                                            textAlign: msg.senderId === currentUser.profileId ? "right" : "left"
+                                            textAlign: msg.senderId === currentUser.profileId ? "right" : "left",
+                                            color: msg.senderId === currentUser.profileId ? "#18191A" : (darkMode ? "#f0f6ff" : "#18191A")
                                         }}
                                     >
                                         <b>{msg.senderId === currentUser.profileId ? "Me" : selectedRoom.recipientName}:</b> {msg.content}
@@ -266,10 +324,10 @@ const Chat = () => {
                                 </div>
                             ))
                         ) : (
-                            <div>Chưa có tin nhắn nào.</div>
+                            <div style={{color: darkMode ? "#f0f6ff" : "#18191A"}}>Chưa có tin nhắn nào.</div>
                         )
                     ) : (
-                        <div>Chọn phòng chat hoặc người dùng để bắt đầu.</div>
+                        <div style={{color: darkMode ? "#f0f6ff" : "#18191A"}}>Chọn phòng chat hoặc người dùng để bắt đầu.</div>
                     )}
                 </div>
                 {/* Form gửi tin nhắn */}
@@ -294,7 +352,8 @@ const Chat = () => {
                                 borderRadius: 20,
                                 outline: "none",
                                 fontSize: 16,
-                                background: "#f1f8e9"
+                                background: darkMode ? "#3a3b3c" : "#f1f8e9",
+                                color: darkMode ? "#f0f6ff" : "#18191A"
                             }}
                         />
                         <button type="submit"
@@ -320,13 +379,13 @@ const Chat = () => {
             </div>
             {/* Bên phải: Danh sách user online */}
             {showOnlineUsers && (
-                <div style={{flex: 1, borderLeft: "none", overflowY: "auto", borderRadius: "18px", border: "none", boxShadow: "0 8px 32px 0 rgba(25, 118, 210, 0.28)", background: "#f0f6ff", transition: "box-shadow 0.3s"}}>
-                    <h3 style={{textAlign: "center"}}>Online Users</h3>
+                <div style={{flex: 1, borderLeft: "none", overflowY: "auto", borderRadius: "18px", border: "none", boxShadow: "0 8px 32px 0 rgba(25, 118, 210, 0.28)", background: darkMode ? "#242526" : "#f0f6ff", transition: "box-shadow 0.3s"}}>
+                    <h3 style={{textAlign: "center", color: darkMode ? "#f0f6ff" : "#18191A"}}>Online Users</h3>
                     <ul style={{listStyle: "none", padding: 0}}>
                         {onlineUsers.map((user, idx) => (
                             <li
                                 key={user.profileId || idx}
-                                style={{padding: "10px", cursor: "pointer"}}
+                                style={{padding: "10px", cursor: "pointer", color: darkMode ? "#f0f6ff" : "#18191A"}}
                                 onClick={() => handleUserClick(user)}
                             >
                                 {user.firstName + " " + user.lastName || user.profileId}
