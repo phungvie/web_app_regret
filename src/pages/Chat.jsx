@@ -34,6 +34,9 @@ const Chat = () => {
 
     const stompClient = useRef(null);
 
+    // State cho ẩn/hiện panel Online Users
+    const [showOnlineUsers, setShowOnlineUsers] = useState(true);
+
     // Lấy thông tin profile của user hiện tại khi component mount
     useEffect(() => {
         getProfile()
@@ -224,6 +227,16 @@ const Chat = () => {
             </div>
             {/* Ở giữa: Hiển thị tin nhắn và gửi tin nhắn */}
             <div style={{flex: 2, display: "flex", flexDirection: "column"}}>
+                {/* Nút ẩn/hiện Online Users */}
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.7)', borderBottom: '1px solid #e0e0e0', minHeight: 48, padding: '0 8px'}}>
+                    <div style={{fontWeight: 'bold', fontSize: 18, color: '#222', letterSpacing: 0.5}}>
+                        {selectedRoom ? (selectedRoom.recipientName || selectedRoom.recipientId) : 'Chọn phòng chat'}
+                    </div>
+                    <button onClick={() => setShowOnlineUsers(v => !v)} style={{marginLeft: 8, border: 'none', background: '#e3f2fd', color: '#1976d2', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <span style={{fontSize: 20, marginRight: 6}}>{showOnlineUsers ? '👥' : '👤'}</span>
+                        {showOnlineUsers ? 'Ẩn' : 'Hiện'} Online Users
+                    </button>
+                </div>
                 <div style={{flex: 1, overflowY: "auto", padding: 16}}>
                     {selectedRoom ? (
                         messages.length ? (
@@ -303,20 +316,22 @@ const Chat = () => {
                 )}
             </div>
             {/* Bên phải: Danh sách user online */}
-            <div style={{flex: 1, borderLeft: "1px solid #eee", overflowY: "auto"}}>
-                <h3 style={{textAlign: "center"}}>Online Users</h3>
-                <ul style={{listStyle: "none", padding: 0}}>
-                    {onlineUsers.map((user, idx) => (
-                        <li
-                            key={user.profileId || idx}
-                            style={{padding: "10px", cursor: "pointer"}}
-                            onClick={() => handleUserClick(user)}
-                        >
-                            {user.firstName + " " + user.lastName || user.profileId}
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            {showOnlineUsers && (
+                <div style={{flex: 1, borderLeft: "1px solid #eee", overflowY: "auto"}}>
+                    <h3 style={{textAlign: "center"}}>Online Users</h3>
+                    <ul style={{listStyle: "none", padding: 0}}>
+                        {onlineUsers.map((user, idx) => (
+                            <li
+                                key={user.profileId || idx}
+                                style={{padding: "10px", cursor: "pointer"}}
+                                onClick={() => handleUserClick(user)}
+                            >
+                                {user.firstName + " " + user.lastName || user.profileId}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
     );
 };
