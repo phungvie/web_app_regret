@@ -205,9 +205,9 @@ const Chat = () => {
     };
 
     return (
-        <div style={{display: "flex", height: "100vh", width: "100vw", border: "1px solid #ccc", position: "fixed", top: 0, left: 0, background: "#fff", zIndex: 1000}}>
+        <div style={{display: "flex", height: "100vh", width: "100vw", border: "none", position: "fixed", top: 0, left: 0, background: "#fff", zIndex: 1000, gap: "8px", padding: "8px", boxShadow: "0 12px 48px 0 rgba(25, 118, 210, 0.25)"}}>
             {/* Bên trái: Danh sách phòng chat */}
-            <div style={{flex: 1, borderRight: "1px solid #eee", overflowY: "auto"}}>
+            <div style={{flex: 1, borderRight: "none", overflowY: "auto", marginRight: "6px", borderRadius: "18px", border: "none", boxShadow: "0 8px 32px 0 rgba(25, 118, 210, 0.28)", background: "#f0f6ff", transition: "box-shadow 0.3s"}}>
                 <h3 style={{textAlign: "center"}}>Chat Rooms</h3>
                 <ul style={{listStyle: "none", padding: 0}}>
                     {chatRooms.map((room, idx) => (
@@ -215,8 +215,11 @@ const Chat = () => {
                             key={idx}
                             style={{
                                 padding: "10px",
-                                background: selectedRoom === room ? "#f0f0f0" : "#fff",
-                                cursor: "pointer"
+                                background: selectedRoom === room ? "#e3f2fd" : "#f0f6ff",
+                                cursor: "pointer",
+                                borderRadius: "12px",
+                                transition: "background 0.3s, box-shadow 0.3s",
+                                boxShadow: selectedRoom === room ? "0 4px 16px 0 rgba(25, 118, 210, 0.18)" : "0 2px 8px 0 rgba(25, 118, 210, 0.10)"
                             }}
                             onClick={() => setSelectedRoom(room)}
                         >
@@ -226,14 +229,14 @@ const Chat = () => {
                 </ul>
             </div>
             {/* Ở giữa: Hiển thị tin nhắn và gửi tin nhắn */}
-            <div style={{flex: 2, display: "flex", flexDirection: "column"}}>
+            <div style={{flex: 2, display: "flex", flexDirection: "column", borderRadius: "12px", border: "none", boxShadow: "0 8px 32px 0 rgba(25, 118, 210, 0.28)", background: "#f0f6ff", transition: "box-shadow 0.3s"}}>
                 {/* Nút ẩn/hiện Online Users */}
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.7)', borderBottom: '1px solid #e0e0e0', minHeight: 48, padding: '0 8px'}}>
                     <div style={{fontWeight: 'bold', fontSize: 18, color: '#222', letterSpacing: 0.5}}>
                         {selectedRoom ? (selectedRoom.recipientName || selectedRoom.recipientId) : 'Chọn phòng chat'}
                     </div>
                     <button onClick={() => setShowOnlineUsers(v => !v)} style={{marginLeft: 8, border: 'none', background: '#e3f2fd', color: '#1976d2', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                        <span style={{fontSize: 20, marginRight: 6}}>{showOnlineUsers ? '👥' : '👤'}</span>
+                        <span style={{fontSize: 20, marginRight: 6}}>{showOnlineUsers ? '����' : '👤'}</span>
                         {showOnlineUsers ? 'Ẩn' : 'Hiện'} Online Users
                     </button>
                 </div>
@@ -276,7 +279,7 @@ const Chat = () => {
                               display: "flex",
                               padding: 8,
                               borderTop: "1px solid #eee",
-                              background: "transparent" // nền trong suốt
+                              background: "transparent" // nền trong su��t
                           }}>
                         <input
                             type="text"
@@ -317,7 +320,7 @@ const Chat = () => {
             </div>
             {/* Bên phải: Danh sách user online */}
             {showOnlineUsers && (
-                <div style={{flex: 1, borderLeft: "1px solid #eee", overflowY: "auto"}}>
+                <div style={{flex: 1, borderLeft: "none", overflowY: "auto", borderRadius: "18px", border: "none", boxShadow: "0 8px 32px 0 rgba(25, 118, 210, 0.28)", background: "#f0f6ff", transition: "box-shadow 0.3s"}}>
                     <h3 style={{textAlign: "center"}}>Online Users</h3>
                     <ul style={{listStyle: "none", padding: 0}}>
                         {onlineUsers.map((user, idx) => (
