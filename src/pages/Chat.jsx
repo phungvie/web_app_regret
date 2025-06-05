@@ -256,7 +256,15 @@ const Chat = () => {
 
     // Danh sách emoji đơn giản
     const emojiList = [
-        "😀", "😂", "😍", "😎", "😭", "😡", "👍", "🙏", "🎉", "❤️", "😅", "😆", "😉", "😘", "😇", "😜", "🤔", "😏", "😬", "😱"
+        "😀", "😂", "😍", "😎", "😭", "😡", "👍", "🙏", "🎉", "❤️", "😅", "😆", "😉", "😘", "😇", "😜", "🤔", "😏", "😬", "😱",
+        "🥰", "🤩", "😋", "😚", "😙", "😗", "😐", "😑", "😶", "🙄", "😯", "😲", "🥲", "🥹", "😮", "😴", "🤤", "😪", "😵", "🤯", "😤", "😠",
+        "😔", "😞", "😟", "😢", "😥", "😰", "😓", "🤧", "🤒", "🤕", "🤑", "🤠", "😈", "👿", "👻", "💀", "☠️", "👽", "🤖", "🎃", "😺",
+        "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾", "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮",
+        "🐷", "🐸", "🐵", "🙈", "🙉", "🙊", "💩", "🔥", "✨", "🌟", "💫", "💥", "💦", "💨", "🕳️", "💣", "💬", "👋", "🤚", "🖐️",
+        "✋", "🖖", "👌", "🤌", "🤏", "✌️", "🤞", "🤟", "🤘", "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👎", "✊", "👊",
+        "🤛", "🤜", "👏", "🙌", "👐", "🤲", "🙏", "✍️", "💅", "🤳", "💪", "🦾", "🦵", "🦶", "👂", "👃", "🧠", "🦷", "🦴", "👀",
+        "👁️", "👅", "👄", "💋", "🩷", "💘", "💝", "💖", "💗", "💓", "💞", "💕", "💟", "❣️", "💔", "❤️‍🔥", "❤️‍🩹", "❤", "🧡", "💛",
+        "💚", "💙", "💜", "🤎", "🖤", "🤍", "💯", "💢", "💥", "💫", "💦", "💨", "🕳️", "💣", "💬", "👋"
     ];
 
     // Hàm thêm emoji vào input
@@ -264,6 +272,27 @@ const Chat = () => {
         setMessageInput(msg => msg + emoji);
         setShowEmojiPicker(false);
     };
+
+    // Thêm ref cho emoji picker
+    const emojiBtnRef = useRef(null);
+    const emojiPickerRef = useRef(null);
+
+    // Đóng emoji picker khi click ra ngoài
+    useEffect(() => {
+        if (!showEmojiPicker) return;
+        const handleClickOutside = (event) => {
+            if (
+                emojiPickerRef.current &&
+                !emojiPickerRef.current.contains(event.target) &&
+                emojiBtnRef.current &&
+                !emojiBtnRef.current.contains(event.target)
+            ) {
+                setShowEmojiPicker(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showEmojiPicker]);
 
     return (
         <div style={{
@@ -460,6 +489,7 @@ const Chat = () => {
                           }}>
                         {/* Nút emoji */}
                         <button type="button"
+                                ref={emojiBtnRef}
                                 onClick={() => setShowEmojiPicker(v => !v)}
                                 style={{
                                     background: darkMode ? "#333" : "#fff",
@@ -482,21 +512,27 @@ const Chat = () => {
                         </button>
                         {/* Emoji picker popup */}
                         {showEmojiPicker && (
-                            <div style={{
-                                position: "absolute",
-                                bottom: 60,
-                                left: 24,
-                                background: darkMode ? "#222" : "#fff",
-                                border: "1.5px solid #b2dfdb",
-                                borderRadius: 12,
-                                boxShadow: "0 4px 16px rgba(76,175,80,0.12)",
-                                padding: 10,
-                                zIndex: 2000,
-                                display: "flex",
-                                flexWrap: "wrap",
-                                width: 260,
-                                gap: 6
-                            }}>
+                            <div
+                                ref={emojiPickerRef}
+                                className={darkMode ? 'emoji-scrollbar-dark' : 'emoji-scrollbar'}
+                                style={{
+                                    position: "absolute",
+                                    bottom: 56,
+                                    left: 0,
+                                    background: darkMode ? "#222" : "#fff",
+                                    border: "1.5px solid #b2dfdb",
+                                    borderRadius: 12,
+                                    boxShadow: "0 4px 16px rgba(76,175,80,0.12)",
+                                    padding: 10,
+                                    zIndex: 2000,
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    width: 260,
+                                    gap: 6,
+                                    maxHeight: 180,
+                                    overflowY: "auto"
+                                }}
+                            >
                                 {emojiList.map((emoji, i) => (
                                     <span key={i}
                                           style={{fontSize: 22, cursor: "pointer", padding: 4, borderRadius: 6, transition: "background 0.2s"}}
@@ -566,7 +602,7 @@ const Chat = () => {
     );
 };
 
-// Custom scrollbar CSS cho dark/light mode
+// Custom scrollbar CSS cho dark/light mode và emoji picker
 const style = document.createElement('style');
 style.innerHTML = `
 .scrollbar-dark::-webkit-scrollbar {
@@ -588,6 +624,26 @@ style.innerHTML = `
   background: #b2dfdb;
   border-radius: 8px;
   border: 2px solid #f0f6ff;
+}
+.emoji-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  background: #e0f2f1;
+  border-radius: 8px;
+}
+.emoji-scrollbar::-webkit-scrollbar-thumb {
+  background: #b2dfdb;
+  border-radius: 8px;
+  border: 2px solid #e0f2f1;
+}
+.emoji-scrollbar-dark::-webkit-scrollbar {
+  width: 8px;
+  background: #222;
+  border-radius: 8px;
+}
+.emoji-scrollbar-dark::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 8px;
+  border: 2px solid #222;
 }
 `;
 document.head.appendChild(style);
