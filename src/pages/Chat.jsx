@@ -216,6 +216,18 @@ const Chat = () => {
         setSelectedRoom(room); // Chọn phòng chat
     };
 
+    // State lưu index các tin nhắn đang hiển thị chi tiết
+    const [detailedMsgIdx, setDetailedMsgIdx] = useState([]);
+
+    // Hàm toggle chi tiết tin nhắn
+    const toggleDetail = idx => {
+        setDetailedMsgIdx(prev =>
+            prev.includes(idx)
+                ? prev.filter(i => i !== idx)
+                : [...prev, idx]
+        );
+    };
+
     function formatTimeAgo(timestamp) {
         const now = new Date();
         const date = new Date(timestamp);
@@ -345,7 +357,8 @@ const Chat = () => {
                                                 style={{
                                                     marginBottom: 8,
                                                     display: "flex",
-                                                    justifyContent: msg.senderId === currentUser.profileId ? "flex-end" : "flex-start"
+                                                    justifyContent: msg.senderId === currentUser.profileId ? "flex-end" : "flex-start",
+                                                    position: "relative"
                                                 }}
                                             >
                                                 <div
@@ -356,10 +369,19 @@ const Chat = () => {
                                                         maxWidth: "60%",
                                                         textAlign: msg.senderId === currentUser.profileId ? "right" : "left",
                                                         color: msg.senderId === currentUser.profileId ? "#18191A" : (darkMode ? "#f0f6ff" : "#18191A"),
-                                                        position: "relative"
+                                                        position: "relative",
+                                                        cursor: "pointer"
                                                     }}
+                                                    onDoubleClick={() => toggleDetail(idx)}
+                                                    onMouseEnter={() => setDetailedMsgIdx(prev => prev.includes('hover'+idx) ? prev : [...prev, 'hover'+idx])}
+                                                    onMouseLeave={() => setDetailedMsgIdx(prev => prev.filter(i => i !== 'hover'+idx))}
                                                 >
                                                     <b>{msg.senderId === currentUser.profileId ? "Me" : selectedRoom.recipientName}:</b> {msg.content}
+                                                    {detailedMsgIdx.includes(idx) && (
+                                                        <div style={{fontSize: 12, color: "#888", marginTop: 4, textAlign: "right"}}>
+                                                            {new Date(msg.timestamp).toLocaleString()}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </React.Fragment>
