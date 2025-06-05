@@ -6,7 +6,7 @@ import keycloak from "../keycloak";
 import { CONFIG} from "../configurations/configuration";
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
-import { FaMoon, FaSun, FaUsers, FaUser } from "react-icons/fa";
+import { FaMoon, FaSun, FaUsers, FaUser, FaSmile } from "react-icons/fa";
 
 const Chat = () => {
     // State lưu danh sách các phòng chat
@@ -251,6 +251,20 @@ const Chat = () => {
         return date.toLocaleDateString();
     }
 
+    // Thêm state cho emoji picker
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+    // Danh sách emoji đơn giản
+    const emojiList = [
+        "😀", "😂", "😍", "😎", "😭", "😡", "👍", "🙏", "🎉", "❤️", "😅", "😆", "😉", "😘", "😇", "😜", "🤔", "😏", "😬", "😱"
+    ];
+
+    // Hàm thêm emoji vào input
+    const addEmoji = (emoji) => {
+        setMessageInput(msg => msg + emoji);
+        setShowEmojiPicker(false);
+    };
+
     return (
         <div style={{
             display: "flex",
@@ -444,6 +458,55 @@ const Chat = () => {
                               borderTop: "1px solid #eee",
                               background: "transparent" // nền trong su��t
                           }}>
+                        {/* Nút emoji */}
+                        <button type="button"
+                                onClick={() => setShowEmojiPicker(v => !v)}
+                                style={{
+                                    background: darkMode ? "#333" : "#fff",
+                                    border: "none",
+                                    borderRadius: 20,
+                                    marginRight: 8,
+                                    width: 40,
+                                    height: 40,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: 22,
+                                    cursor: "pointer",
+                                    color: darkMode ? "#43a047" : "#388e3c",
+                                    boxShadow: "0 1px 4px rgba(76,175,80,0.08)"
+                                }}
+                                tabIndex={-1}
+                        >
+                            <FaSmile />
+                        </button>
+                        {/* Emoji picker popup */}
+                        {showEmojiPicker && (
+                            <div style={{
+                                position: "absolute",
+                                bottom: 60,
+                                left: 24,
+                                background: darkMode ? "#222" : "#fff",
+                                border: "1.5px solid #b2dfdb",
+                                borderRadius: 12,
+                                boxShadow: "0 4px 16px rgba(76,175,80,0.12)",
+                                padding: 10,
+                                zIndex: 2000,
+                                display: "flex",
+                                flexWrap: "wrap",
+                                width: 260,
+                                gap: 6
+                            }}>
+                                {emojiList.map((emoji, i) => (
+                                    <span key={i}
+                                          style={{fontSize: 22, cursor: "pointer", padding: 4, borderRadius: 6, transition: "background 0.2s"}}
+                                          onClick={() => addEmoji(emoji)}
+                                          onMouseOver={e => e.currentTarget.style.background = darkMode ? '#333' : '#e0f2f1'}
+                                          onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+                                    >{emoji}</span>
+                                ))}
+                            </div>
+                        )}
                         <input
                             type="text"
                             value={messageInput}
@@ -466,7 +529,7 @@ const Chat = () => {
                                     background: "#66bb6a",
                                     color: "#fff",
                                     border: "none",
-                                    borderRadius: 8, // vuông hơn
+                                    borderRadius: 8,
                                     padding: "10px 24px",
                                     fontWeight: 600,
                                     fontSize: 16,
