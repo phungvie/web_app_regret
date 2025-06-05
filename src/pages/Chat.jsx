@@ -333,7 +333,18 @@ const Chat = () => {
                         {showOnlineUsers ? (<FaUsers />) : (<FaUser />)}
                     </button>
                 </div>
-                <div style={{flex: 1, overflowY: "auto", padding: 16}}>
+                <div style={{
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: 16,
+                    // Custom scrollbar styles
+                    scrollbarWidth: 'thin', // Firefox
+                    scrollbarColor: darkMode ? '#555 #242526' : '#b2dfdb #f0f6ff',
+                    msOverflowStyle: 'auto', // IE/Edge
+                    position: 'relative',
+                }}
+                className={darkMode ? 'scrollbar-dark' : 'scrollbar-light'}
+                >
                     {selectedRoom ? (
                         messages.length ? (
                             (() => {
@@ -463,5 +474,30 @@ const Chat = () => {
     );
 };
 
+// Custom scrollbar CSS cho dark/light mode
+const style = document.createElement('style');
+style.innerHTML = `
+.scrollbar-dark::-webkit-scrollbar {
+  width: 10px;
+  background: #242526;
+  border-radius: 8px;
+}
+.scrollbar-dark::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 8px;
+  border: 2px solid #242526;
+}
+.scrollbar-light::-webkit-scrollbar {
+  width: 10px;
+  background: #f0f6ff;
+  border-radius: 8px;
+}
+.scrollbar-light::-webkit-scrollbar-thumb {
+  background: #b2dfdb;
+  border-radius: 8px;
+  border: 2px solid #f0f6ff;
+}
+`;
+document.head.appendChild(style);
 
 export default Chat;
