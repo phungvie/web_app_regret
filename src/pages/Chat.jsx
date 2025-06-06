@@ -180,16 +180,18 @@ const Chat = () => {
                 content: messageInput,
             });
             // Thêm tin nhắn vừa gửi vào danh sách tin nhắn nếu gửi thành công
-            setMessages(prev => [
-                ...prev,
-                {
-                    senderId: currentUser.profileId,
-                    recipientId: selectedRoom.recipientId,
-                    content: messageInput,
-                    timestamp: new Date().toISOString(),
-                    // Có thể bổ sung thêm các trường khác nếu API trả về
-                }
-            ]);
+            if(currentUser.profileId!==selectedRoom.recipientId){
+                setMessages(prev => [
+                    ...prev,
+                    {
+                        senderId: currentUser.profileId,
+                        recipientId: selectedRoom.recipientId,
+                        content: messageInput,
+                        timestamp: new Date().toISOString(),
+                        // Có thể bổ sung thêm các trường khác nếu API trả về
+                    }
+                ]);
+            }
             setMessageInput("");
         } catch (err) {
             console.error("Lỗi sendMessage", err);
