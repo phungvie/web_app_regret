@@ -106,8 +106,10 @@ const Chat = () => {
         async function fetchMessages() {
             if (selectedRoom) {
                 const response = await getMessages(selectedRoom.senderId, selectedRoom.recipientId);
-                setMessages(response.data.result);
-                console.log("getMessages", response.data.result)
+                // Sắp xếp tin nhắn theo thời gian tăng dần (cũ -> mới)
+                const sortedMessages = response.data.result.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                setMessages(sortedMessages);
+                console.log("getMessages", sortedMessages)
             }
         }
 
