@@ -292,6 +292,16 @@ const Chat = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showEmojiPicker]);
 
+    // Ref cho container tin nhắn để cuộn xuống cuối
+    const messagesEndRef = useRef(null);
+
+    // Tự động cuộn xuống cuối khi đổi phòng chat hoặc có tin nhắn mới
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [selectedRoom, messages]);
+
     return (
         <div style={{
             display: "flex",
@@ -420,54 +430,58 @@ const Chat = () => {
                             (() => {
                                 const timeThreshold = 5 * 60; // 5 phút
                                 let lastTimestamp = null;
-                                return messages.map((msg, idx) => {
-                                    const current = new Date(msg.timestamp);
-                                    let showTime = false;
-                                    if (!lastTimestamp || (current - lastTimestamp) / 1000 > timeThreshold) {
-                                        showTime = true;
-                                        lastTimestamp = current;
-                                    }
-                                    return (
-                                        <React.Fragment key={idx}>
-                                            {showTime && (
-                                                <div style={{textAlign: "center", color: "#888", fontSize: 13, margin: "12px 0 4px 0"}}>
-                                                    {formatTimeAgo(msg.timestamp)}
-                                                </div>
-                                            )}
-                                            <div
-                                                style={{
-                                                    marginBottom: 8,
-                                                    display: "flex",
-                                                    justifyContent: msg.senderId === currentUser.profileId ? "flex-end" : "flex-start",
-                                                    position: "relative"
-                                                }}
-                                            >
+                                return [
+                                    ...messages.map((msg, idx) => {
+                                        const current = new Date(msg.timestamp);
+                                        let showTime = false;
+                                        if (!lastTimestamp || (current - lastTimestamp) / 1000 > timeThreshold) {
+                                            showTime = true;
+                                            lastTimestamp = current;
+                                        }
+                                        return (
+                                            <React.Fragment key={idx}>
+                                                {showTime && (
+                                                    <div style={{textAlign: "center", color: "#888", fontSize: 13, margin: "12px 0 4px 0"}}>
+                                                        {formatTimeAgo(msg.timestamp)}
+                                                    </div>
+                                                )}
                                                 <div
                                                     style={{
-                                                        background: msg.senderId === currentUser.profileId ? "#DCF8C6" : (darkMode ? "#3a3b3c" : "#f1f0f0"),
-                                                        padding: "8px 12px",
-                                                        borderRadius: 12,
-                                                        maxWidth: "60%",
-                                                        textAlign: msg.senderId === currentUser.profileId ? "right" : "left",
-                                                        color: msg.senderId === currentUser.profileId ? "#18191A" : (darkMode ? "#f0f6ff" : "#18191A"),
-                                                        position: "relative",
-                                                        cursor: "pointer"
+                                                        marginBottom: 8,
+                                                        display: "flex",
+                                                        justifyContent: msg.senderId === currentUser.profileId ? "flex-end" : "flex-start",
+                                                        position: "relative"
                                                     }}
-                                                    onDoubleClick={() => toggleDetail(idx)}
-                                                    onMouseEnter={() => setDetailedMsgIdx(prev => prev.includes('hover'+idx) ? prev : [...prev, 'hover'+idx])}
-                                                    onMouseLeave={() => setDetailedMsgIdx(prev => prev.filter(i => i !== 'hover'+idx))}
                                                 >
-                                                    <b>{msg.senderId === currentUser.profileId ? "Me" : selectedRoom.recipientName}:</b> {msg.content}
-                                                    {detailedMsgIdx.includes(idx) && (
-                                                        <div style={{fontSize: 12, color: "#888", marginTop: 4, textAlign: "right"}}>
-                                                            {new Date(msg.timestamp).toLocaleString()}
-                                                        </div>
-                                                    )}
+                                                    <div
+                                                        style={{
+                                                            background: msg.senderId === currentUser.profileId ? "#DCF8C6" : (darkMode ? "#3a3b3c" : "#f1f0f0"),
+                                                            padding: "8px 12px",
+                                                            borderRadius: 12,
+                                                            maxWidth: "60%",
+                                                            textAlign: msg.senderId === currentUser.profileId ? "right" : "left",
+                                                            color: msg.senderId === currentUser.profileId ? "#18191A" : (darkMode ? "#f0f6ff" : "#18191A"),
+                                                            position: "relative",
+                                                            cursor: "pointer"
+                                                        }}
+                                                        onDoubleClick={() => toggleDetail(idx)}
+                                                        onMouseEnter={() => setDetailedMsgIdx(prev => prev.includes('hover'+idx) ? prev : [...prev, 'hover'+idx])}
+                                                        onMouseLeave={() => setDetailedMsgIdx(prev => prev.filter(i => i !== 'hover'+idx))}
+                                                    >
+                                                        <b>{msg.senderId === currentUser.profileId ? "Me" : selectedRoom.recipientName}:</b> {msg.content}
+                                                        {detailedMsgIdx.includes(idx) && (
+                                                            <div style={{fontSize: 12, color: "#888", marginTop: 4, textAlign: "right"}}>
+                                                                {new Date(msg.timestamp).toLocaleString()}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </React.Fragment>
-                                    );
-                                });
+                                            </React.Fragment>
+                                        );
+                                    }),
+                                    // Thêm ref ở cuối danh sách tin nhắn
+                                    <div key="end" ref={messagesEndRef} />
+                                ];
                             })()
                         ) : (
                             <div style={{color: darkMode ? "#f0f6ff" : "#18191A"}}>Chưa có tin nhắn nào.</div>
