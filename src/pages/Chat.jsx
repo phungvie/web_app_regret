@@ -1,12 +1,12 @@
 // Chat.jsx - Giao diện chat với chú thích từng dòng
-import React, { useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {connectUser, disconnectUser, getMyProfile, getOnlineUsers} from "../services/userService";
 import {getMessages, getMyChatRooms, sendMessage} from "../services/chatService";
 import keycloak from "../keycloak";
 import {CONFIG} from "../configurations/configuration";
 import SockJS from 'sockjs-client';
 import {Stomp} from '@stomp/stompjs';
-import {FaMoon, FaSun, FaUsers, FaUser} from "react-icons/fa";
+import {FaUsers, FaUser} from "react-icons/fa";
 import EmojiConvertor from 'emoji-js';
 import ChatRoomList from '../components/ChatRoomList';
 import MessageList from '../components/MessageList';
@@ -111,10 +111,10 @@ const Chat = () => {
     useEffect(() => {
         async function fetchMessages() {
             if (selectedRoom) {
-                const response = await getMessages(selectedRoom.senderId, selectedRoom.recipientId, 200, 0);
+                const response = await getMessages(selectedRoom.senderId, selectedRoom.recipientId, 20, 0);
                 // Sắp xếp tin nhắn theo thời gian tăng dần (cũ -> mới)
                 const sortedMessages = response.data.result.content
-                    // .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))p
+                    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
                 ;
                 setMessages(sortedMessages);
                 console.log("getMessages", sortedMessages)
@@ -330,11 +330,13 @@ const Chat = () => {
             zIndex: 1000,
             gap: "8px",
             padding: "8px",
-            boxShadow: darkMode ? "0 12px 48px 0 rgba(25, 118, 210, 0.10)" : "0 12px 48px 0 rgba(25, 118, 210, 0.25)"
+            boxShadow: darkMode ? "0 12px 48px 0 rgba(25, 118, 210, 0.10)" : "0 12px 48px 0 rgba(25, 118, 210, 0.25)",
+            // Thêm padding-top để tránh header che mất nội dung
+            paddingTop: 64
         }}>
             {/* Header với dark mode toggle */}
             <div style={{position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1200}}>
-                <ChatHeader currentUser={currentUser} darkMode={darkMode} setDarkMode={setDarkMode} />
+                <ChatHeader currentUser={currentUser} darkMode={darkMode} setDarkMode={setDarkMode}/>
             </div>
             {/* Bên trái: Danh sách phòng chat */}
             <ChatRoomList
@@ -386,7 +388,7 @@ const Chat = () => {
                         justifyContent: 'center',
                         gap: '6px'
                     }}>
-                        {showOnlineUsers ? (<FaUsers/>) : (<FaUser/>) }
+                        {showOnlineUsers ? (<FaUsers/>) : (<FaUser/>)}
                     </button>
                 </div>
                 <MessageList

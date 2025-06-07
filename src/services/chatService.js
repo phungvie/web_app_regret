@@ -1,5 +1,5 @@
 import httpClient from "../configurations/httpClient";
-import { CONFIG, API } from "../configurations/configuration";
+import { API } from "../configurations/configuration";
 import keycloak from "../keycloak";
 
 export const getMyChatRooms = async () => {
