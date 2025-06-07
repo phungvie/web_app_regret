@@ -7,6 +7,8 @@ import {CONFIG} from "../configurations/configuration";
 import SockJS from 'sockjs-client';
 import {Stomp} from '@stomp/stompjs';
 import {FaMoon, FaSun, FaUsers, FaUser, FaSmile} from "react-icons/fa";
+import EmojiPicker from 'emoji-picker-react';
+import EmojiConvertor from 'emoji-js';
 
 const Chat = () => {
     // State lưu danh sách các phòng chat
@@ -262,20 +264,9 @@ const Chat = () => {
     // Thêm state cho emoji picker
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-    // Danh sách emoji phân loại
-    const emojiCategories = {
-        "Smileys": ["😀", "😂", "😍", "😎", "😭", "😡", "😅", "😆", "😉", "😘", "😇", "😜", "🤔", "😏", "😬", "😱", "🥰", "🤩", "😋", "😚", "😙", "😗", "😐", "😑", "😶", "🙄", "😯", "😲", "🥲", "🥹", "😮", "😴", "🤤", "😪", "😵", "🤯", "😤", "😠", "😔", "😞", "😟", "😢", "😥", "😰", "😓"],
-        "Gestures": ["👍", "🙏", "👏", "🙌", "👐", "🤲", "✍️", "💅", "🤳", "💪", "🦾", "🦵", "🦶", "👂", "👃", "🧠", "🦷", "🦴", "👀", "👁️", "👅", "👄", "💋", "👋", "🤚", "🖐️", "✋", "🖖", "👌", "🤌", "🤏", "✌️", "🤞", "🤟", "🤘", "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👎", "✊", "👊", "🤛", "🤜"],
-        "Hearts": ["❤️", "🩷", "💘", "💝", "💖", "💗", "💓", "💞", "💕", "💟", "❣️", "💔", "❤️‍🔥", "❤️‍🩹", "❤", "🧡", "💛", "💚", "💙", "💜", "🤎", "🖤", "🤍"],
-        "Animals": ["😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾", "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐸", "🐵", "🙈", "🙉", "🙊"],
-        "Other": ["💩", "🔥", "✨", "🌟", "💫", "💥", "💦", "💨", "🕳️", "💣", "💬", "🎉", "😈", "👿", "👻", "💀", "☠️", "👽", "🤖", "🎃", "🤑", "🤠", "💯", "💢"]
-    };
-    const emojiCategoryNames = Object.keys(emojiCategories);
-    const [selectedEmojiCategory, setSelectedEmojiCategory] = useState(emojiCategoryNames[0]);
-
-    // Hàm thêm emoji vào input
-    const addEmoji = (emoji) => {
-        setMessageInput(msg => msg + emoji);
+    // Hàm thêm emoji vào input (dùng emoji-picker-react)
+    const onEmojiClick = (emojiData) => {
+        setMessageInput(msg => msg + emojiData.emoji);
         setShowEmojiPicker(false);
     };
 
@@ -310,6 +301,16 @@ const Chat = () => {
         }
     }, [selectedRoom, messages]);
 
+
+    // Khởi tạo emoji-js convertor
+    const emoji = new EmojiConvertor();
+    emoji.replace_mode = 'unified';
+    emoji.allow_native = true;
+
+    // Hàm chuyển đổi ký tự mặt cười thành emoji dùng emoji-js
+    function replaceEmoticonsWithEmoji(text) {
+        return emoji.replace_emoticons(text);
+    }
 
     return (
         <div style={{
@@ -523,7 +524,7 @@ const Chat = () => {
                                                         onMouseEnter={() => setDetailedMsgIdx(prev => prev.includes('hover' + idx) ? prev : [...prev, 'hover' + idx])}
                                                         onMouseLeave={() => setDetailedMsgIdx(prev => prev.filter(i => i !== 'hover' + idx))}
                                                     >
-                                                        <b>{msg.senderId === currentUser.profileId ? "Me" : selectedRoom.recipientName}:</b> {msg.content}
+                                                        <b>{msg.senderId === currentUser.profileId ? "Me" : selectedRoom.recipientName}:</b> <span dangerouslySetInnerHTML={{__html: replaceEmoticonsWithEmoji(msg.content)}} />
                                                         {detailedMsgIdx.includes(idx) && (
                                                             <div style={{
                                                                 fontSize: 12,
@@ -567,8 +568,8 @@ const Chat = () => {
                                 style={{
                                     background: darkMode ? "#333" : "#fff",
                                     border: "none",
-                                    borderRadius: 20,
-                                    marginRight: 8,
+                                    borderRadius: "20px",
+                                    marginRight: "8px",
                                     width: 40,
                                     height: 40,
                                     display: "flex",
@@ -583,64 +584,18 @@ const Chat = () => {
                         >
                             <FaSmile/>
                         </button>
-                        {/* Emoji picker popup */}
+                        {/* Emoji picker popup (emoji-picker-react) */}
                         {showEmojiPicker && (
                             <div
                                 ref={emojiPickerRef}
-                                className={darkMode ? 'emoji-scrollbar-dark' : 'emoji-scrollbar'}
                                 style={{
                                     position: "absolute",
-                                    bottom: 56,
-                                    left: 0,
-                                    background: darkMode ? "#222" : "#fff",
-                                    border: "1.5px solid #b2dfdb",
-                                    borderRadius: 12,
-                                    boxShadow: "0 4px 16px rgba(76,175,80,0.12)",
-                                    padding: 10,
+                                    bottom: 70,
+                                    left: 100,
                                     zIndex: 2000,
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    width: 260,
-                                    maxHeight: 220,
-                                    overflowY: "auto"
                                 }}
                             >
-                                {/* Tabs chọn loại emoji */}
-                                <div style={{display: 'flex', gap: 4, marginBottom: 8, flexWrap: 'wrap'}}>
-                                    {emojiCategoryNames.map(cat => (
-                                        <button
-                                            key={cat}
-                                            onClick={() => setSelectedEmojiCategory(cat)}
-                                            style={{
-                                                padding: '4px 10px',
-                                                borderRadius: 8,
-                                                border: 'none',
-                                                background: selectedEmojiCategory === cat ? (darkMode ? '#43a047' : '#b2dfdb') : 'transparent',
-                                                color: selectedEmojiCategory === cat ? (darkMode ? '#fff' : '#222') : (darkMode ? '#b0bec5' : '#607d8b'),
-                                                fontWeight: 600,
-                                                cursor: 'pointer',
-                                                fontSize: 14
-                                            }}
-                                        >{cat}</button>
-                                    ))}
-                                </div>
-                                {/* Danh sách emoji theo loại */}
-                                <div style={{display: 'flex', flexWrap: 'wrap', gap: 6, overflowY: 'auto'}}>
-                                    {emojiCategories[selectedEmojiCategory].map((emoji, i) => (
-                                        <span key={i}
-                                              style={{
-                                                  fontSize: 22,
-                                                  cursor: "pointer",
-                                                  padding: 4,
-                                                  borderRadius: 6,
-                                                  transition: "background 0.2s"
-                                              }}
-                                              onClick={() => addEmoji(emoji)}
-                                              onMouseOver={e => e.currentTarget.style.background = darkMode ? '#333' : '#e0f2f1'}
-                                              onMouseOut={e => e.currentTarget.style.background = 'transparent'}
-                                        >{emoji}</span>
-                                    ))}
-                                </div>
+                                <EmojiPicker theme={darkMode ? 'dark' : 'light'} onEmojiClick={onEmojiClick} height={350} width={300}/>
                             </div>
                         )}
                         <input
@@ -653,7 +608,7 @@ const Chat = () => {
                                 marginRight: 8,
                                 padding: "10px 14px",
                                 border: "1px solid #b2dfdb",
-                                borderRadius: 20,
+                                borderRadius: "20px",
                                 outline: "none",
                                 fontSize: 16,
                                 background: darkMode ? "#3a3b3c" : "#f1f8e9",
@@ -665,7 +620,7 @@ const Chat = () => {
                                     background: "#66bb6a",
                                     color: "#fff",
                                     border: "none",
-                                    borderRadius: 8,
+                                    borderRadius: "8px",
                                     padding: "10px 24px",
                                     fontWeight: 600,
                                     fontSize: 16,
@@ -715,27 +670,33 @@ const Chat = () => {
 const style = document.createElement('style');
 style.innerHTML = `
 .scrollbar-dark::-webkit-scrollbar {
-  width: 10px;
-  background: #242526;
-  border-radius: 8px;
+  width: 12px;
+  background: #23272f;
+  border-radius: 10px;
 }
 .scrollbar-dark::-webkit-scrollbar-thumb {
-  background: #555;
-  border-radius: 8px;
-  border: 2px solid #242526;
+  background: linear-gradient(135deg, #43a047 0%, #388e3c 100%);
+  border-radius: 10px;
+  border: 3px solid #23272f;
+}
+.scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
 }
 .scrollbar-light::-webkit-scrollbar {
-  width: 10px;
-  background: #f0f6ff;
-  border-radius: 8px;
+  width: 12px;
+  background: #e3f2fd;
+  border-radius: 10px;
 }
 .scrollbar-light::-webkit-scrollbar-thumb {
-  background: #b2dfdb;
-  border-radius: 8px;
-  border: 2px solid #f0f6ff;
+  background: linear-gradient(135deg, #b2dfdb 0%, #43a047 100%);
+  border-radius: 10px;
+  border: 3px solid #e3f2fd;
+}
+.scrollbar-light::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #66bb6a 0%, #388e3c 100%);
 }
 .emoji-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
   background: #e0f2f1;
   border-radius: 8px;
 }
@@ -745,7 +706,7 @@ style.innerHTML = `
   border: 2px solid #e0f2f1;
 }
 .emoji-scrollbar-dark::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
   background: #222;
   border-radius: 8px;
 }
@@ -753,6 +714,32 @@ style.innerHTML = `
   background: #555;
   border-radius: 8px;
   border: 2px solid #222;
+}
+.EmojiPickerReact .epr-body::-webkit-scrollbar {
+  width: 10px;
+  background: #e0f2f1;
+  border-radius: 8px;
+}
+.EmojiPickerReact .epr-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #b2dfdb 0%, #43a047 100%);
+  border-radius: 8px;
+  border: 2px solid #e0f2f1;
+}
+.EmojiPickerReact .epr-body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #66bb6a 0%, #388e3c 100%);
+}
+.EmojiPickerReact .epr-body {
+  scrollbar-width: thin;
+  scrollbar-color: #43a047 #e0f2f1;
+}
+/* Firefox */
+.scrollbar-dark {
+  scrollbar-width: thin;
+  scrollbar-color: #43a047 #23272f;
+}
+.scrollbar-light {
+  scrollbar-width: thin;
+  scrollbar-color: #43a047 #e3f2fd;
 }
 `;
 document.head.appendChild(style);
