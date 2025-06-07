@@ -1,13 +1,12 @@
 // Chat.jsx - Giao diện chat với chú thích từng dòng
-import React, {useCallback, useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState} from "react";
 import {connectUser, disconnectUser, getMyProfile, getOnlineUsers} from "../services/userService";
 import {getMessages, getMyChatRooms, sendMessage} from "../services/chatService";
 import keycloak from "../keycloak";
 import {CONFIG} from "../configurations/configuration";
 import SockJS from 'sockjs-client';
 import {Stomp} from '@stomp/stompjs';
-import {FaMoon, FaSun, FaUsers, FaUser, FaSmile} from "react-icons/fa";
-import EmojiPicker from 'emoji-picker-react';
+import {FaMoon, FaSun, FaUsers, FaUser} from "react-icons/fa";
 import EmojiConvertor from 'emoji-js';
 import ChatRoomList from '../components/ChatRoomList';
 import MessageList from '../components/MessageList';
@@ -51,7 +50,7 @@ const Chat = () => {
 
     // Lưu darkMode vào localStorage mỗi khi thay đổi
     useEffect(() => {
-        localStorage.setItem('darkMode', darkMode);
+        localStorage.setItem('darkMode', darkMode.toString());
     }, [darkMode]);
 
     // Lấy thông tin profile của user hiện tại khi component mount
@@ -185,11 +184,11 @@ const Chat = () => {
         if (e) e.preventDefault();
         if (!messageInput.trim()) return;
         try {
-            const res = await sendMessage({
+            await sendMessage({
                 recipientId: selectedRoom.recipientId,
                 content: messageInput,
             });
-            // Thêm tin nhắn vừa gửi vào danh sách tin nhắn nếu gửi thành công
+// Thêm tin nhắn vừa gửi vào danh sách tin nhắn nếu gửi thành công
             if (currentUser.profileId !== selectedRoom.recipientId) {
                 const newMessage = {
                     senderId: currentUser.profileId,
