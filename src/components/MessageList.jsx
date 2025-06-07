@@ -1,6 +1,17 @@
 import React from "react";
 
-const MessageList = ({ messages, currentUser, selectedRoom, darkMode, detailedMsgIdx, toggleDetail, formatTimeAgo, messagesEndRef, replaceEmoticonsWithEmoji, setDetailedMsgIdx }) => (
+const MessageList = ({
+                         messages,
+                         currentUser,
+                         selectedRoom,
+                         darkMode,
+                         detailedMsgIdx,
+                         toggleDetail,
+                         formatTimeAgo,
+                         messagesEndRef,
+                         replaceEmoticonsWithEmoji,
+                         setDetailedMsgIdx
+                     }) => (
     <div
         style={{
             flex: 1,
@@ -55,13 +66,17 @@ const MessageList = ({ messages, currentUser, selectedRoom, darkMode, detailedMs
                                                 textAlign: msg.senderId === currentUser.profileId ? "right" : "left",
                                                 color: msg.senderId === currentUser.profileId ? "#18191A" : (darkMode ? "#f0f6ff" : "#18191A"),
                                                 position: "relative",
-                                                cursor: "pointer"
+                                                cursor: "pointer",
+                                                wordBreak: "break-word",
+                                                overflowWrap: "break-word",
+                                                whiteSpace: "pre-wrap"
                                             }}
                                             onDoubleClick={() => toggleDetail(idx)}
                                             onMouseEnter={() => setDetailedMsgIdx(prev => prev.includes('hover' + idx) ? prev : [...prev, 'hover' + idx])}
                                             onMouseLeave={() => setDetailedMsgIdx(prev => prev.filter(i => i !== 'hover' + idx))}
                                         >
-                                            <b>{msg.senderId === currentUser.profileId ? "Me" : selectedRoom.recipientName}:</b> <span dangerouslySetInnerHTML={{__html: replaceEmoticonsWithEmoji(msg.content)}} />
+                                            <span
+                                                dangerouslySetInnerHTML={{__html: replaceEmoticonsWithEmoji(msg.content)}}/>
                                             {detailedMsgIdx.includes(idx) && (
                                                 <div style={{
                                                     fontSize: 12,
@@ -84,10 +99,9 @@ const MessageList = ({ messages, currentUser, selectedRoom, darkMode, detailedMs
                 <div style={{color: darkMode ? "#f0f6ff" : "#18191A"}}>Chưa có tin nhắn nào.</div>
             )
         ) : (
-            <div style={{color: darkMode ? "#f0f6ff" : "#18191A"}}>Chọn phòng chat hoặc người dùng để bắt đầu.</div>
+            <div style={{color: darkMode ? "#f0f6ff" : "#18191A"}}>Chọn phòng chat hoặc người dùng đ�� bắt đầu.</div>
         )}
     </div>
 );
 
 export default MessageList;
-

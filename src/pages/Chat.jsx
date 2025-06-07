@@ -111,10 +111,10 @@ const Chat = () => {
     useEffect(() => {
         async function fetchMessages() {
             if (selectedRoom) {
-                const response = await getMessages(selectedRoom.senderId, selectedRoom.recipientId, 20, 0);
+                const response = await getMessages(selectedRoom.senderId, selectedRoom.recipientId, 200, 0);
                 // Sắp xếp tin nhắn theo thời gian tăng dần (cũ -> mới)
                 const sortedMessages = response.data.result.content
-                    // .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+                    // .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))p
                 ;
                 setMessages(sortedMessages);
                 console.log("getMessages", sortedMessages)

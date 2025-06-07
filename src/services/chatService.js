@@ -19,8 +19,8 @@ export const getMessages = async (senderId, recipientId, size, page) => {
             Authorization: "Bearer " + keycloak.token
         },
         params:{
-            senderId: size,
-            recipientId: page
+            size: size,
+            page: page
         }
     });
 }
