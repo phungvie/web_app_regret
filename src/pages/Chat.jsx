@@ -12,6 +12,7 @@ import ChatRoomList from '../components/ChatRoomList';
 import MessageList from '../components/MessageList';
 import MessageInput from '../components/MessageInput';
 import OnlineUserList from '../components/OnlineUserList';
+import ChatHeader from '../components/ChatHeader';
 
 const Chat = () => {
     // State lưu danh sách các phòng chat
@@ -331,28 +332,10 @@ const Chat = () => {
             padding: "8px",
             boxShadow: darkMode ? "0 12px 48px 0 rgba(25, 118, 210, 0.10)" : "0 12px 48px 0 rgba(25, 118, 210, 0.25)"
         }}>
-            {/* Nút chuyển dark/light mode */}
-            <button
-                onClick={() => setDarkMode(dm => !dm)}
-                style={{
-                    position: "absolute",
-                    top: 16,
-                    left: 32,
-                    zIndex: 1100,
-                    padding: "8px 16px",
-                    borderRadius: "8px",
-                    border: "none",
-                    background: darkMode ? "#333" : "#e3f2fd",
-                    color: darkMode ? "#f0f6ff" : "#18191A",
-                    cursor: "pointer",
-                    boxShadow: "0 2px 8px 0 rgba(25, 118, 210, 0.10)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px"
-                }}
-            >
-                {darkMode ? (<FaSun/>) : (<FaMoon/>) }
-            </button>
+            {/* Header với dark mode toggle */}
+            <div style={{position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1200}}>
+                <ChatHeader currentUser={currentUser} darkMode={darkMode} setDarkMode={setDarkMode} />
+            </div>
             {/* Bên trái: Danh sách phòng chat */}
             <ChatRoomList
                 chatRooms={chatRooms}
