@@ -10,13 +10,17 @@ export const getMyChatRooms = async () => {
     })
 }
 
-export const getMessages = async (senderId, recipientId) => {
+export const getMessages = async (senderId, recipientId, size, page) => {
     const url = API.MESSAGES_SENDER_RECIPIENT
         .replace("{senderId}", senderId)
         .replace("{recipientId}", recipientId);
     return await httpClient.get(url, {
         headers: {
             Authorization: "Bearer " + keycloak.token
+        },
+        params:{
+            senderId: size,
+            recipientId: page
         }
     });
 }

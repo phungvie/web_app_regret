@@ -3,10 +3,10 @@ import React, {useCallback, useEffect, useRef, useState} from "react";
 import {connectUser, disconnectUser, getMyProfile, getOnlineUsers} from "../services/userService";
 import {getMessages, getMyChatRooms, sendMessage} from "../services/chatService";
 import keycloak from "../keycloak";
-import { CONFIG} from "../configurations/configuration";
+import {CONFIG} from "../configurations/configuration";
 import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
-import { FaMoon, FaSun, FaUsers, FaUser, FaSmile } from "react-icons/fa";
+import {Stomp} from '@stomp/stompjs';
+import {FaMoon, FaSun, FaUsers, FaUser, FaSmile} from "react-icons/fa";
 
 const Chat = () => {
     // State lưu danh sách các phòng chat
@@ -105,9 +105,11 @@ const Chat = () => {
     useEffect(() => {
         async function fetchMessages() {
             if (selectedRoom) {
-                const response = await getMessages(selectedRoom.senderId, selectedRoom.recipientId);
+                const response = await getMessages(selectedRoom.senderId, selectedRoom.recipientId, 20, 0);
                 // Sắp xếp tin nhắn theo thời gian tăng dần (cũ -> mới)
-                const sortedMessages = response.data.result.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                const sortedMessages = response.data.result.content
+                    // .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+                ;
                 setMessages(sortedMessages);
                 console.log("getMessages", sortedMessages)
             }
@@ -127,7 +129,7 @@ const Chat = () => {
         const socket = new SockJS(CONFIG.API_GATEWAY + '/ws');
         stompClient.current = Stomp.over(socket);
         stompClient.current.connect(
-            { Authorization: 'Bearer ' + keycloak.token },
+            {Authorization: 'Bearer ' + keycloak.token},
             onConnected,
             onError
         );
@@ -151,7 +153,7 @@ const Chat = () => {
         // stompClient.current.subscribe(`/user/public`, onMessageReceived);
 
         // stompClient.current.send("/app/user.connectUser", {});
-        connectUser().catch(reason => console.error("lỗi api connectUser",reason));
+        connectUser().catch(reason => console.error("lỗi api connectUser", reason));
 
         // Đăng ký nhận tin nhắn public nếu cần
         // stompClient.current.subscribe('/topic/public', onMessageReceived);
@@ -182,10 +184,10 @@ const Chat = () => {
                 content: messageInput,
             });
             // Thêm tin nhắn vừa gửi vào danh sách tin nhắn nếu gửi thành công
-            if(currentUser.profileId!==selectedRoom.recipientId){
+            if (currentUser.profileId !== selectedRoom.recipientId) {
                 const newMessage = {
                     senderId: currentUser.profileId,
-                        recipientId: selectedRoom.recipientId,
+                    recipientId: selectedRoom.recipientId,
                     content: messageInput,
                     timestamp: new Date().toISOString(),
                     // Có thể bổ sung thêm các trường khác nếu API trả về
@@ -194,7 +196,7 @@ const Chat = () => {
                     ...prev,
                     newMessage
                 ]);
-                console.log("newMessage",newMessage)
+                console.log("newMessage", newMessage)
             }
             setMessageInput("");
         } catch (err) {
@@ -304,7 +306,7 @@ const Chat = () => {
     // Tự động cuộn xuống cuối khi đổi phòng chat hoặc có tin nhắn mới
     useEffect(() => {
         if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+            messagesEndRef.current.scrollIntoView({behavior: 'smooth'});
         }
     }, [selectedRoom, messages]);
 
@@ -345,7 +347,7 @@ const Chat = () => {
                     gap: "8px"
                 }}
             >
-                {darkMode ? (<FaSun />) : (<FaMoon />)}
+                {darkMode ? (<FaSun/>) : (<FaMoon/>)}
             </button>
             {/* Bên trái: Danh sách phòng chat */}
             <div style={{
@@ -399,7 +401,13 @@ const Chat = () => {
                                 }}>{avatarText}</div>
                                 {/* Info */}
                                 <div style={{flex: 1, minWidth: 0}}>
-                                    <div style={{fontSize: 16, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>{name}</div>
+                                    <div style={{
+                                        fontSize: 16,
+                                        fontWeight: 600,
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
+                                    }}>{name}</div>
                                     <div style={{fontSize: 12, color: darkMode ? '#b0bec5' : '#607d8b', marginTop: 2}}>
                                         ID: {room.recipientId}
                                     </div>
@@ -410,14 +418,49 @@ const Chat = () => {
                 </ul>
             </div>
             {/* Ở giữa: Hiển thị tin nhắn và gửi tin nhắn */}
-            <div style={{flex: 2, display: "flex", flexDirection: "column", borderRadius: "12px", border: "none", boxShadow: darkMode ? "0 8px 32px 0 rgba(25, 118, 210, 0.10)" : "0 8px 32px 0 rgba(25, 118, 210, 0.28)", background: darkMode ? "#242526" : "#f0f6ff", transition: "box-shadow 0.3s"}}>
+            <div style={{
+                flex: 2,
+                display: "flex",
+                flexDirection: "column",
+                borderRadius: "12px",
+                border: "none",
+                boxShadow: darkMode ? "0 8px 32px 0 rgba(25, 118, 210, 0.10)" : "0 8px 32px 0 rgba(25, 118, 210, 0.28)",
+                background: darkMode ? "#242526" : "#f0f6ff",
+                transition: "box-shadow 0.3s"
+            }}>
                 {/* Nút ẩn/hiện Online Users */}
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: darkMode ? "rgba(255,255,255,0.1)" : 'rgba(255,255,255,0.7)', borderBottom: '1px solid #e0e0e0', minHeight: 48, padding: '0 8px'}}>
-                    <div style={{fontWeight: 'bold', fontSize: 18, color: darkMode ? "#f0f6ff" : '#222', letterSpacing: 0.5}}>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    background: darkMode ? "rgba(255,255,255,0.1)" : 'rgba(255,255,255,0.7)',
+                    borderBottom: '1px solid #e0e0e0',
+                    minHeight: 48,
+                    padding: '0 8px'
+                }}>
+                    <div style={{
+                        fontWeight: 'bold',
+                        fontSize: 18,
+                        color: darkMode ? "#f0f6ff" : '#222',
+                        letterSpacing: 0.5
+                    }}>
                         {selectedRoom ? (selectedRoom.recipientName || selectedRoom.recipientId) : 'Chọn phòng chat'}
                     </div>
-                    <button onClick={() => setShowOnlineUsers(v => !v)} style={{marginLeft: 8, border: 'none', background: darkMode ? "#333" : "#e3f2fd", color: darkMode ? "#f0f6ff" : "#1976d2", borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'}}>
-                        {showOnlineUsers ? (<FaUsers />) : (<FaUser />)}
+                    <button onClick={() => setShowOnlineUsers(v => !v)} style={{
+                        marginLeft: 8,
+                        border: 'none',
+                        background: darkMode ? "#333" : "#e3f2fd",
+                        color: darkMode ? "#f0f6ff" : "#1976d2",
+                        borderRadius: 6,
+                        padding: '6px 12px',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                    }}>
+                        {showOnlineUsers ? (<FaUsers/>) : (<FaUser/>)}
                     </button>
                 </div>
                 <div style={{
@@ -430,7 +473,7 @@ const Chat = () => {
                     msOverflowStyle: 'auto', // IE/Edge
                     position: 'relative',
                 }}
-                className={darkMode ? 'scrollbar-dark' : 'scrollbar-light'}
+                     className={darkMode ? 'scrollbar-dark' : 'scrollbar-light'}
                 >
                     {selectedRoom ? (
                         messages.length ? (
@@ -448,7 +491,12 @@ const Chat = () => {
                                         return (
                                             <React.Fragment key={idx}>
                                                 {showTime && (
-                                                    <div style={{textAlign: "center", color: "#888", fontSize: 13, margin: "12px 0 4px 0"}}>
+                                                    <div style={{
+                                                        textAlign: "center",
+                                                        color: "#888",
+                                                        fontSize: 13,
+                                                        margin: "12px 0 4px 0"
+                                                    }}>
                                                         {formatTimeAgo(msg.timestamp)}
                                                     </div>
                                                 )}
@@ -472,12 +520,17 @@ const Chat = () => {
                                                             cursor: "pointer"
                                                         }}
                                                         onDoubleClick={() => toggleDetail(idx)}
-                                                        onMouseEnter={() => setDetailedMsgIdx(prev => prev.includes('hover'+idx) ? prev : [...prev, 'hover'+idx])}
-                                                        onMouseLeave={() => setDetailedMsgIdx(prev => prev.filter(i => i !== 'hover'+idx))}
+                                                        onMouseEnter={() => setDetailedMsgIdx(prev => prev.includes('hover' + idx) ? prev : [...prev, 'hover' + idx])}
+                                                        onMouseLeave={() => setDetailedMsgIdx(prev => prev.filter(i => i !== 'hover' + idx))}
                                                     >
                                                         <b>{msg.senderId === currentUser.profileId ? "Me" : selectedRoom.recipientName}:</b> {msg.content}
                                                         {detailedMsgIdx.includes(idx) && (
-                                                            <div style={{fontSize: 12, color: "#888", marginTop: 4, textAlign: "right"}}>
+                                                            <div style={{
+                                                                fontSize: 12,
+                                                                color: "#888",
+                                                                marginTop: 4,
+                                                                textAlign: "right"
+                                                            }}>
                                                                 {new Date(msg.timestamp).toLocaleString()}
                                                             </div>
                                                         )}
@@ -487,14 +540,15 @@ const Chat = () => {
                                         );
                                     }),
                                     // Thêm ref ở cuối danh sách tin nhắn
-                                    <div key="end" ref={messagesEndRef} />
+                                    <div key="end" ref={messagesEndRef}/>
                                 ];
                             })()
                         ) : (
                             <div style={{color: darkMode ? "#f0f6ff" : "#18191A"}}>Chưa có tin nhắn nào.</div>
                         )
                     ) : (
-                        <div style={{color: darkMode ? "#f0f6ff" : "#18191A"}}>Chọn phòng chat hoặc người dùng để bắt đầu.</div>
+                        <div style={{color: darkMode ? "#f0f6ff" : "#18191A"}}>Chọn phòng chat hoặc người dùng để bắt
+                            đầu.</div>
                     )}
                 </div>
                 {/* Form gửi tin nhắn */}
@@ -527,7 +581,7 @@ const Chat = () => {
                                 }}
                                 tabIndex={-1}
                         >
-                            <FaSmile />
+                            <FaSmile/>
                         </button>
                         {/* Emoji picker popup */}
                         {showEmojiPicker && (
@@ -574,7 +628,13 @@ const Chat = () => {
                                 <div style={{display: 'flex', flexWrap: 'wrap', gap: 6, overflowY: 'auto'}}>
                                     {emojiCategories[selectedEmojiCategory].map((emoji, i) => (
                                         <span key={i}
-                                              style={{fontSize: 22, cursor: "pointer", padding: 4, borderRadius: 6, transition: "background 0.2s"}}
+                                              style={{
+                                                  fontSize: 22,
+                                                  cursor: "pointer",
+                                                  padding: 4,
+                                                  borderRadius: 6,
+                                                  transition: "background 0.2s"
+                                              }}
                                               onClick={() => addEmoji(emoji)}
                                               onMouseOver={e => e.currentTarget.style.background = darkMode ? '#333' : '#e0f2f1'}
                                               onMouseOut={e => e.currentTarget.style.background = 'transparent'}
@@ -623,7 +683,16 @@ const Chat = () => {
             </div>
             {/* Bên phải: Danh sách user online */}
             {showOnlineUsers && (
-                <div style={{flex: 1, borderLeft: "none", overflowY: "auto", borderRadius: "18px", border: "none", boxShadow: "0 8px 32px 0 rgba(25, 118, 210, 0.28)", background: darkMode ? "#242526" : "#f0f6ff", transition: "box-shadow 0.3s"}}>
+                <div style={{
+                    flex: 1,
+                    borderLeft: "none",
+                    overflowY: "auto",
+                    borderRadius: "18px",
+                    border: "none",
+                    boxShadow: "0 8px 32px 0 rgba(25, 118, 210, 0.28)",
+                    background: darkMode ? "#242526" : "#f0f6ff",
+                    transition: "box-shadow 0.3s"
+                }}>
                     <h3 style={{textAlign: "center", color: darkMode ? "#f0f6ff" : "#18191A"}}>Online Users</h3>
                     <ul style={{listStyle: "none", padding: 0}}>
                         {onlineUsers.map((user, idx) => (
