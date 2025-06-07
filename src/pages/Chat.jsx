@@ -593,9 +593,19 @@ const Chat = () => {
                                     bottom: 70,
                                     left: 100,
                                     zIndex: 2000,
+                                    boxShadow: "0 12px 48px 0 rgba(25, 118, 210, 0.38), 0 4px 16px 0 rgba(76, 175, 80, 0.22)",
+                                    borderRadius: 20,
+                                    background: darkMode ? "#23272f" : "#fff",
+                                    border: darkMode ? "2px solid #388e3c" : "2px solid #43a047",
+                                    padding: 6,
+                                    minWidth: 380,
+                                    minHeight: 420,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
                                 }}
                             >
-                                <EmojiPicker theme={darkMode ? 'dark' : 'light'} onEmojiClick={onEmojiClick} height={350} width={300}/>
+                                <EmojiPicker theme={darkMode ? 'dark' : 'light'} onEmojiClick={onEmojiClick} height={400} width={360}/>
                             </div>
                         )}
                         <input
