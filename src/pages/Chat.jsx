@@ -4,6 +4,7 @@ import {connectUser, disconnectUser, getMyProfile, getOnlineUsers} from "../serv
 import {getMessages, getMyChatRooms, sendMessage} from "../services/chatService";
 import keycloak from "../keycloak";
 import {CONFIG} from "../configurations/configuration";
+import SockJS from 'sockjs-client';
 import {Stomp} from '@stomp/stompjs';
 import {FaUsers, FaUser} from "react-icons/fa";
 import EmojiConvertor from 'emoji-js';
@@ -131,11 +132,19 @@ const Chat = () => {
     useEffect(() => {
         // Chỉ kết nối khi đã có thông tin user
         if (!currentUser.profileId) return;
-        // const socket = new SockJS(CONFIG.API_GATEWAY + '/ws');
-        const socket = new window.WebSocket(CONFIG.WS+"/ws"
-            + '?access_token=' + keycloak.token
-        );
-        stompClient.current = Stomp.over(socket);
+
+        // const socket = new SockJS(CONFIG.API_GATEWAY + '/ws'
+        //     + '?access_token=' + keycloak.token
+        // );
+
+        // const socket = new window.WebSocket(CONFIG.WS+"/ws"
+        //     + '?access_token=' + keycloak.token
+        // );
+        stompClient.current = Stomp.over(function () {
+            return new SockJS(CONFIG.API_GATEWAY + '/ws'
+                + '?access_token=' + keycloak.token
+            )
+        });
         stompClient.current.connect(
             {
                 // Authorization: 'Bearer ' + keycloak.token
