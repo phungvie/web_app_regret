@@ -1,5 +1,6 @@
 export const CONFIG = {
-  API_GATEWAY: "http://localhost:8091/regret",
+  API_GATEWAY: "http://localhost:8091",
+  WS: "ws://localhost:8091",
 };
 
 export const API = {
